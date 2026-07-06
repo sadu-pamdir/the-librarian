@@ -1,0 +1,5 @@
+library/master/*.zim
+library/sandbox/
+.venv/
+__pycache__/
+.DS_Store
