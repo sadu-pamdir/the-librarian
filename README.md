@@ -38,10 +38,26 @@ The fix isn't a bigger model. It's a different job description:
 
 WikiChat (Stanford) · RAG (Lewis et al. 2020) · Kiwix/openZIM + existing ZIM MCP servers · Karpathy's LLM-wiki pattern · TreeSLS (SOSP '23). Standing on all of these shoulders, deliberately.
 
+## Quickstart
+
+```sh
+scripts/fetch-tools.sh                      # kiwix-tools from the official release server
+# put one or more .zim archives into library/master/  (https://library.kiwix.org)
+scripts/serve.sh &                          # archive layer on :8181
+python3 src/librarian/librarian.py "Photosynthesis"   # ask the library
+python3 scripts/compile.py 'Photosynthesis' eng       # compile a curated page
+```
+
+Every compiled page starts as `verified: no` — quarantine before trust.
+An MCP server (`src/librarian/mcp_server.py`) exposes `ask_library` / `get_page` / `list_topics` to any MCP client.
+
 ## Status
 
 Spec: draft v0.1 — open for issues and tear-downs.
-Reference implementation: C1–C4 loop, single-machine, coming first.
+Reference implementation: **working** — C1–C4 loop + two-tenant promotion (C6) + MCP, single machine, stdlib only.
+Measured on Apple M4 Max with the complete German (≈ 14 GB) and English (≈ 49 GB) Wikipedia ZIMs live:
+**30–50 ms** compiled route, **50–60 ms** archive route, including interpreter startup.
+Latency did not degrade moving from 2 GB test archives to the full 63 GB corpus.
 
 ## License
 

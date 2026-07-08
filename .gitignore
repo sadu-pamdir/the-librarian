@@ -3,3 +3,9 @@ library/sandbox/
 .venv/
 __pycache__/
 .DS_Store
+
+# runtime logs
+library/*.log
+
+# third-party binaries (fetched, not vendored — see scripts/fetch-tools.sh)
+tools/
