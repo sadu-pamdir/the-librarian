@@ -2,7 +2,7 @@
 
 **A specification for sovereign, auditable, navigation-first AI.**
 
-The model never invents facts. It navigates to them — in a library you own, offline, with every answer citing file and section.
+The model never invents facts. It navigates to them: in a library you own, offline, with every answer citing file and section.
 
 ## Why
 
@@ -18,13 +18,13 @@ The fix isn't a bigger model. It's a different job description:
   3. A compiled, cross-linked Markdown wiki ("LLM wiki" pattern)
   4. A single deterministic index layer (`knowledge-map.md`)
   5. OpenAPI vendor contracts + a **two-tenant quarantine** (online sandbox → reviewed, hashed promotion → offline master)
-- 🛠 A **reference implementation** (in progress) targeting a single machine — no cloud required.
+- 🛠 A **reference implementation** (working, see Status) targeting a single machine, no cloud required.
 - 📝 An **essay** on the design philosophy (linked).
 
 ## What this is not
 
 - Not a new model, not a new RAG paper, not a product.
-- Not a claim that the components are novel — see [Related Work](#related-work). The contribution is the integration contract and the sovereignty guarantees.
+- Not a claim that the components are novel; see [Related Work](#related-work). The contribution is the integration contract and the sovereignty guarantees.
 
 ## Design principles
 
@@ -48,17 +48,21 @@ python3 src/librarian/librarian.py "Photosynthesis"   # ask the library
 python3 scripts/compile.py 'Photosynthesis' eng       # compile a curated page
 ```
 
-Every compiled page starts as `verified: no` — quarantine before trust.
+Every compiled page starts as `verified: no`. Quarantine before trust.
 An MCP server (`src/librarian/mcp_server.py`) exposes `ask_library` / `get_page` / `list_topics` to any MCP client.
 
 ## Status
 
-Spec: draft v0.1 — open for issues and tear-downs.
-Reference implementation: **working** — C1–C4 loop + two-tenant promotion (C6) + MCP, single machine, stdlib only.
+Spec: draft v0.1, open for issues and tear-downs.
+Reference implementation is **working**: C1–C4 loop + two-tenant promotion (C6) + MCP, single machine, stdlib only.
 Measured on Apple M4 Max with the complete German (≈ 14 GB) and English (≈ 49 GB) Wikipedia ZIMs live:
 **30–50 ms** compiled route, **50–60 ms** archive route, including interpreter startup.
 Latency did not degrade moving from 2 GB test archives to the full 63 GB corpus.
 
+## Acknowledgments
+
+Built by Sadu Pamdir in collaboration with Claude (Fable 5, Anthropic) as a hands-on assistant. The direction, the decisions and the remaining errors are the author's. Standing on the shoulders listed under Related Work.
+
 ## License
 
-MIT. Take it, build it, sell it, improve it — attribution appreciated, not required.
+MIT. Take it, build it, sell it, improve it. Attribution appreciated, not required.
