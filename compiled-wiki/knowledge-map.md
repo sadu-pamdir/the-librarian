@@ -8,3 +8,4 @@
 |---|---|---|
 | (empty — populated by the compile step) | | |
 | Photosynthese | photosynthese.md | /content/wikipedia_de_top_nopic_2026-04/Photosynthese (book: deu) |
+| Photovoltaik | photovoltaik.md | /content/wikipedia_de_top_nopic_2026-04/Photovoltaik (book: deu) |

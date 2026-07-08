@@ -5,6 +5,12 @@ Pull one article from the archive layer (kiwix-serve), strip it to clean text,
 write a compiled-wiki page with frontmatter, and register it in the
 knowledge-map. Stdlib only.
 
+Every page starts as `verified: no`. Quarantine before trust: a human (or an
+audited research pass) flips it to `verified: yes` after checking the passage
+against its source of record. List the backlog with:
+
+    grep -rl 'verified: no' compiled-wiki/
+
 usage: compile.py '<search term>' <book> [page-slug]
 """
 from __future__ import annotations
@@ -43,6 +49,7 @@ def main() -> None:
         f"topic: {term}\n"
         f"source_of_record: {src} (book: {book})\n"
         f"compiled: {today}\n"
+        f"verified: no\n"
         f"---\n\n"
         f"# {term}\n\n"
         f"{ans.passage}\n\n"

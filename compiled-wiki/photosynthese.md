@@ -2,6 +2,7 @@
 topic: Photosynthese
 source_of_record: /content/wikipedia_de_top_nopic_2026-04/Photosynthese (book: deu)
 compiled: 2026-07-07
+verified: no
 ---
 
 # Photosynthese
