@@ -59,6 +59,12 @@ Measured on Apple M4 Max with the complete German (≈ 14 GB) and English (≈ 4
 **30–50 ms** compiled route, **50–60 ms** archive route, including interpreter startup.
 Latency did not degrade moving from 2 GB test archives to the full 63 GB corpus.
 
+## Cite
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21269197.svg)](https://doi.org/10.5281/zenodo.21269197)
+
+> Pamdir, S. (2026). *The Librarian: A Specification for Sovereign, Auditable, Navigation-First AI* (v0.1). Zenodo. https://doi.org/10.5281/zenodo.21269197
+
 ## Acknowledgments
 
 Built by Sadu Pamdir in collaboration with Claude (Fable 5, Anthropic) as a hands-on assistant. The direction, the decisions and the remaining errors are the author's. Standing on the shoulders listed under Related Work.
