@@ -2,7 +2,7 @@
 topic: Photovoltaik
 source_of_record: /content/wikipedia_de_top_nopic_2026-04/Photovoltaik (book: deu)
 compiled: 2026-07-08
-verified: no
+verified: yes
 ---
 
 # Photovoltaik
