@@ -53,15 +53,22 @@ def load_map() -> list[dict]:
 
 def route_compiled(question: str) -> dict | None:
     """Deterministic routing: keyword overlap question <-> topic. No embeddings
-    needed for the core loop; a recall layer may be added later, optionally."""
+    needed for the core loop; a recall layer may be added later, optionally.
+
+    Refuted-wing rows carry a higher burden: labeling a question as touching a
+    documented falsehood needs at least TWO overlapping keywords, so that a
+    single generic word ("vaccine", "anatomy", "plus") cannot trigger the
+    refuted answer. Multiple map rows may point to the same page (language
+    aliases)."""
     q = set(re.findall(r"\w+", question.lower()))
     best, score = None, 0
     for row in load_map():
         t = set(re.findall(r"\w+", row["topic"].lower()))
         s = len(q & t)
-        if s > score:
+        minimum = 2 if row["page"].startswith("refuted/") else 1
+        if s >= minimum and s > score:
             best, score = row, s
-    return best if score >= 1 else None
+    return best
 
 
 # ------------------------------------------------------- C2/C1: archive layer
