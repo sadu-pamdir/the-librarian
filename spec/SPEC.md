@@ -1,10 +1,12 @@
 # The Librarian: A Specification for Sovereign, Auditable, Navigation-First AI
 
-**Sadu Pamdir** · Independent Researcher, Switzerland · Draft v0.1 · License: MIT (spec) / CC BY 4.0 (text)
+**Sadu Pamdir** · Independent Researcher, Switzerland · Draft v0.2 · License: MIT (spec) / CC BY 4.0 (text)
 
 ## Abstract
 
 Large language models answer by predicting plausible text, which makes them eloquent and unreliable in the same breath. This paper specifies an alternative operating mode we call *the Librarian*: the model never serves as the source of facts, only as the interface to a locally held, versioned, auditable library. The specification integrates five existing, individually proven components: offline knowledge archives (ZIM/Kiwix), the Model Context Protocol (MCP), a compile-step that turns raw sources into a cross-referenced Markdown wiki with a single index layer, machine-readable vendor contracts (OpenAPI), and a two-tenant quarantine that separates a volatile online sandbox from an immutable offline master. None of these components is novel. The contribution is the integration contract between them, and a design philosophy: navigation instead of generation, sources instead of confidence, local sovereignty instead of cloud dependency. We describe the architecture, its auditability and privacy properties, its limitations, and a reference-implementation roadmap.
+
+Version 0.2 extends the library in one direction the literature mostly ignores: **the known-false**. A library that only holds the true loses the refutation with every refuted claim. We add a claim catalog with typed claims (formal, empirical, experiential, interpretive), a *refuted wing* that makes documented falsehoods first-class, citable answers, and a clarifying-interview step in which the librarian asks before it routes.
 
 ## 1. Problem
 
@@ -32,6 +34,8 @@ This spec builds on, and must be honest about, substantial prior art:
 3. **Quarantine before trust.** Nothing enters the master tenant unreviewed. Online material lands in a sandbox tenant; promotion to the offline master is an explicit, logged act.
 4. **Compile once, answer cheaply.** Ingestion is a deliberate compile step, not per-query scraping. Answering reads an index file and one page; no vector database is required for the core loop.
 5. **Degrade gracefully offline.** The system's full factual competence must be available with zero network.
+6. **Honest in both directions** *(v0.2)*. Knowing that a claim is false is knowledge, often more expensively won than the true claim beside it. A documented falsehood is a first-class answer ("refuted, by this source"), never a silent miss.
+7. **Ask before you route** *(v0.2)*. For ambiguous or consequential questions the librarian interviews the user first: one question at a time, with a recommendation, resolving only what the library itself cannot resolve. The same discipline applies at the promotion gate, where the *source* is interrogated.
 
 ## 4. Architecture
 
@@ -45,22 +49,49 @@ This spec builds on, and must be honest about, substantial prior art:
 | C4 | **Index layer** | Deterministic routing | A single human-readable `knowledge-map.md`; the model reads the map, then exactly one page |
 | C5 | **Contract layer** | Machine-precise vendor knowledge | OpenAPI specifications where vendors publish them (e.g., Cisco Catalyst Center Intent API); the model draws syntax from the spec, not from parametric memory |
 | C6 | **Two-tenant boundary** | Trust management | Sandbox tenant (online, volatile, quarantined) → reviewed promotion → master tenant (offline, immutable, signed) |
+| C7 | **Refuted wing** *(v0.2)* | Documented falsehoods as first-class results | A filtered view over the claim catalog (§4.4); implemented as `compiled-wiki/refuted/` pages routed by the same knowledge-map |
 
 ### 4.2 The answer path
 
 ```
 User intent
-   → C4 knowledge-map (route)
-   → C3 compiled page  ─ if missing ─→ C2/C1 archive lookup ─ if missing ─→ C6 sandbox (online, quarantined)
+   → (clarify: interview if ambiguous or consequential — v0.2)
+   → C4 knowledge-map (routes against BOTH wings)
+   → C3 compiled page ─ or ─ C7 refuted page ("documented falsehood, refuted by …")
+        └ if missing ─→ C2/C1 archive lookup ─ if missing ─→ C6 sandbox (online, quarantined)
    → answer with citation (file + section)
    → optional: promotion proposal sandbox → master (human-approved, logged)
 ```
 
-Every hop is logged. An answer without a resolvable citation is delivered as *unsourced synthesis*, visibly labeled.
+Every hop is logged. An answer without a resolvable citation is delivered as *unsourced synthesis*, visibly labeled. A hit in the refuted wing is a first-class result, not a failure mode.
 
 ### 4.3 Integrity
 
 Promoted artifacts are hashed (SHA-256) and chained; the promotion log is append-only. (This mirrors requirements the Swiss GeBüV places on business records and reuses a pattern already implemented in our accounting pipeline.)
+
+### 4.4 The claim catalog and the refuted wing (v0.2)
+
+Libraries have always tried to hold the known-true; the known-false was left to scattered errata. Borges' total library fails precisely because its librarians cannot tell the two apart. We make the distinction a data structure.
+
+**The catalog holds claims, not topics.** "Hypnosis" is not an entry; "hypnosis reduces surgical pain" is. Every claim page declares:
+
+```yaml
+claim: "The claim, verbatim"
+type: formal | empirical | experiential | interpretive
+status: proven | supported | effective-unexplained | attested | open |
+        disputed | unsupported | refuted
+refuted-by / evidence: source with date, file + section
+paired-with: complement page, if any
+last-checked: YYYY-MM-DD
+```
+
+**Claim types and their standards.** A *formal* claim is judged by proof (2 + 2 = 5: refuted — the hardest status). An *empirical* claim is judged by studies and reproduction ("the MMR vaccine causes autism": refuted — Lancet full retraction 2010, Taylor et al. 2014). An *experiential* claim is judged by documented practice under stated conditions (expert intuition: supported *within* domains that give fast, reliable feedback — Kahneman & Klein 2009). An *interpretive* claim is a map, not a territory, judged by coherence and usefulness ("attested", deliberately weaker than "supported").
+
+**Type-relative judgment, with an anti-abuse rule.** A claim may only be refuted within its own type — but the moment a claim prescribes action in the physical world (healing, measurable effect, prediction), it *is* empirical, whatever its label; re-labeling after refutation is prohibited and logged. This single rule blocks the classic escape route of pseudoscience without letting the empirical standard colonize maps that never claimed to be territory.
+
+**Complement pairs.** One word often carries two claims. "Chakras as measurable anatomy" (empirical: unsupported) and "chakras as an experiential map used across traditions" (interpretive: attested) are two honest entries that reference each other — a measurement waiting for a meaning, a meaning waiting for a measurement. Convergence across traditions is treated as a *prioritization signal* (worth looking here), never as proof: geocentrism converged for millennia. Where a claim carries both empirical support and convergent interpretation, the pair may be marked a *convergence point* — the catalog's strongest, and rarest, annotation.
+
+**The refuted wing is a view, not a second store.** `refuted/` is the filtered set of claims whose status is refuted/unsupported/outdated, routed by the same knowledge-map. One catalog, one truth administration, honest in both directions.
 
 ## 5. Properties
 
@@ -68,6 +99,7 @@ Promoted artifacts are hashed (SHA-256) and chained; the promotion log is append
 - **Sovereignty:** the full loop (archive, index, model, logs) runs on hardware the operator owns; compliant-by-design for GDPR/revDSG contexts.
 - **Energy/cost:** the core loop is two file reads; no per-query embedding search is required. (Vector search may be added as an *optional* recall layer, never as the source of record.)
 - **Longevity:** knowledge survives vendor death; ZIM archives from a decade ago still open today.
+- **Bidirectional honesty** *(v0.2)*: the system can say "this is documented as false, refuted by X" with the same auditability as any positive answer — a capability plain RAG over the known-true cannot express.
 
 ## 6. Outlook (position, not claim)
 
@@ -82,11 +114,17 @@ Two convergence theses motivate where this spec wants to run eventually. We stat
 - ZIM snapshots lag live Wikipedia; the two-tenant design makes this explicit rather than hiding it.
 - OpenAPI coverage is limited to what vendors publish; CLI handbooks remain semi-structured.
 - The spec does not solve alignment or reasoning quality; it constrains *where facts come from*, not *how well the model thinks*.
-- **First measurements (reference implementation, Apple M4 Max, 07/2026):** with four live ZIM archives served by kiwix-serve, including the complete German Wikipedia (~14 GB, 2026-01) and the complete English Wikipedia (~49 GB, 2026-06) for ~63 GB total, the full answer path returns in **30-50 ms** on the compiled route (knowledge-map -> page) and **50-60 ms** on the archive route (search -> fetch -> extract), *including* Python interpreter startup, on a dependency-free stdlib implementation. Latency did not degrade when moving from ~2 GB test archives to the full 63 GB corpus. This substantiates the "two file reads" cost claim; broader benchmarks (recall quality, curation effort) remain open.
+- **v0.2 limitations:** the refuted wing doubles the curation duty — an empty or stale negative wing is worse than none, because it implies exhaustiveness it does not have. `last-checked` makes status drift visible but does not prevent it; a review rhythm is an operational requirement, not a data structure. Assigning claim types can itself be contested; the anti-abuse rule covers the dangerous direction (physical-world claims escaping the empirical standard), while the remaining edge cases require the same human adjudication as promotion.
+- **First measurements (reference implementation, Apple M4 Max, 07/2026):** with four live ZIM archives served by kiwix-serve, including the complete German Wikipedia (~14 GB, 2026-01) and the complete English Wikipedia (~49 GB, 2026-06) for ~63 GB total, the full answer path returns in **30-50 ms** on the compiled route (knowledge-map -> page) and **50-60 ms** on the archive route (search -> fetch -> extract), *including* Python interpreter startup, on a dependency-free stdlib implementation. Latency did not degrade when moving from ~2 GB test archives to the full 63 GB corpus. This substantiates the "two file reads" cost claim; broader benchmarks (recall quality, curation effort) remain open. **v0.2 addendum (07/2026):** the refuted wing is implemented and seeded (three claims, one complement pair); routing answers both wings correctly in a six-query test including the pair split and the archive fallback.
 
 ## References
 
-*(Full list with links in the Rex audit file; to be formatted for publication.)* Semnani et al. 2023 (WikiChat, arXiv:2305.14292) · Lewis et al. 2020 (RAG) · Boroumand et al. 2018 (ASPLOS, consumer-workload energy) · TreeSLS, SOSP 2023 · Kantamneni & Tegmark 2025 (arXiv:2502.00873) · Kiwix/openZIM project · Cisco DevNet Catalyst Center API · TDK press 2022/2024 · QD Laser RETISSA · Moravec 1988 · von der Malsburg (binding-by-synchrony).
+*(Full list with links in the Rex audit file; to be formatted for publication.)* Semnani et al. 2023 (WikiChat, arXiv:2305.14292) · Lewis et al. 2020 (RAG) · Boroumand et al. 2018 (ASPLOS, consumer-workload energy) · TreeSLS, SOSP 2023 · Kantamneni & Tegmark 2025 (arXiv:2502.00873) · Kiwix/openZIM project · Cisco DevNet Catalyst Center API · TDK press 2022/2024 · QD Laser RETISSA · Moravec 1988 · von der Malsburg (binding-by-synchrony). *v0.2:* Popper 1959 (falsification) · The Lancet 2010 (retraction of Wakefield et al. 1998) · Taylor, Swerdfeger & Eslick 2014 (Vaccine, meta-analysis) · Kahneman & Klein 2009 (Am. Psychologist, conditions for expert intuition) · Borges 1939/1941 (The Total Library / The Library of Babel) · Retraction Watch.
+
+## Changelog
+
+- **v0.2 (2026-07-16):** claim catalog with typed claims (§4.4), refuted wing as component C7 with first-class routing, complement pairs and convergence points, anti-abuse rule, clarifying-interview step (principles 6-7), reference implementation seeded and tested. Concept red-team-reviewed before drafting (10 findings incorporated, including the anti-abuse rule and the demotion of convergence from proof to prioritization signal).
+- **v0.1 (2026-07-08):** initial specification, published (DOI 10.5281/zenodo.21269197).
 
 ## Acknowledgments
 
