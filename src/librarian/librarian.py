@@ -2,9 +2,11 @@
 """the-librarian — reference implementation of the C1-C4 answer path.
 
 Navigate, don't generate:
-    intent -> knowledge-map (C4) -> compiled page (C3)
+    intent -> knowledge-map (C4) -> compiled page (C3) or refuted wing (C7)
            -> fallback: archive search via kiwix-serve (C2 over C1)
     Every answer carries a citation. No citation -> labeled UNSOURCED.
+    A hit in the refuted wing is a first-class result: the librarian answers
+    "documented falsehood, refuted by [source]" instead of staying silent.
 
 Stdlib only. No dependencies, by design.
 """
@@ -28,7 +30,7 @@ KIWIX = "http://127.0.0.1:8181"
 
 @dataclass
 class Answer:
-    status: str          # "compiled" | "archive" | "unsourced"
+    status: str          # "compiled" | "refuted" | "archive" | "unsourced"
     passage: str
     citation: str        # file/section or archive URL — the source of record
     route: list[str]     # hops taken, for the audit log
@@ -42,7 +44,7 @@ def load_map() -> list[dict]:
         return rows
     for line in KNOWLEDGE_MAP.read_text(encoding="utf-8").splitlines():
         m = re.match(r"\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|", line)
-        if m and m.group(1).lower() not in ("topic", "---", ""):
+        if m and m.group(1).lower() not in ("topic", "claim", "---", ""):
             topic, page, source = (g.strip() for g in m.groups())
             if page and not topic.startswith("(") and not set(topic) <= {"-", " "}:
                 rows.append({"topic": topic, "page": page, "source": source})
@@ -148,11 +150,51 @@ def compiled_answer(row: dict) -> Answer | None:
     )
 
 
+# ----------------------------------------------------- C7: the refuted wing
+def _frontmatter(text: str) -> dict:
+    m = re.match(r"^---\n(.*?)\n---\n", text, flags=re.S)
+    fm = {}
+    if m:
+        for line in m.group(1).splitlines():
+            if ":" in line:
+                k, v = line.split(":", 1)
+                fm[k.strip()] = v.strip().strip('"')
+    return fm
+
+
+def refuted_answer(row: dict) -> Answer | None:
+    """A refuted-wing hit is a first-class result, not a failure mode."""
+    page = COMPILED / row["page"]
+    if not page.exists():
+        return None
+    text = page.read_text(encoding="utf-8")
+    fm = _frontmatter(text)
+    body = re.sub(r"^---\n.*?\n---\n", "", text, flags=re.S).strip()
+    status = fm.get("status", "refuted")
+    passage = (
+        f"DOCUMENTED FALSEHOOD (status: {status}, claim type: "
+        f"{fm.get('type', '?')}) — claim: {fm.get('claim', row['topic'])!r}. "
+        + body[:700] + ("…" if len(body) > 700 else "")
+    )
+    return Answer(
+        status="refuted",
+        passage=passage,
+        citation=(f"compiled-wiki/{row['page']} (refuted by: "
+                  f"{fm.get('refuted-by', row['source'])}; last-checked: "
+                  f"{fm.get('last-checked', '?')})"),
+        route=[f"C4 knowledge-map (refuted wing): claim '{row['topic']}'",
+               f"C7 refuted page: {row['page']}"],
+    )
+
+
 # ------------------------------------------------------------------ the loop
 def ask(question: str, lang: str | None = None) -> Answer:
     row = route_compiled(question)
     if row:
-        ans = compiled_answer(row)
+        if row["page"].startswith("refuted/"):
+            ans = refuted_answer(row)
+        else:
+            ans = compiled_answer(row)
         if ans:
             return ans
     ans = archive_search(question, lang)

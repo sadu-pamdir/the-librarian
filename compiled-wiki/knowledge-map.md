@@ -9,3 +9,18 @@
 | (empty — populated by the compile step) | | |
 | Photosynthese | photosynthese.md | /content/wikipedia_de_top_nopic_2026-04/Photosynthese (book: deu) |
 | Photovoltaik | photovoltaik.md | /content/wikipedia_de_top_nopic_2026-04/Photovoltaik (book: deu) |
+| Chakras experiential map traditions | chakras-experiential-map.md | compiled claim page (type: interpretive; convergence = prioritization signal) |
+
+## Refuted wing — documented falsehoods (first-class results, not failures)
+
+> Routing checks BOTH tables. A hit below answers "documented falsehood,
+> refuted by [source]" instead of silence. The wing is a filtered view over
+> one claim catalog, not a second truth store. A claim may only be judged
+> within its own claim type; claims prescribing physical-world action are
+> always held to the empirical standard (anti-abuse rule).
+
+| Claim | Page | Refuted by |
+|---|---|---|
+| 2 plus 2 equals 5 | refuted/two-plus-two-equals-five.md | Peano axioms (formal proof) |
+| MMR vaccine causes autism | refuted/mmr-vaccine-autism.md | Lancet full retraction 2010; Taylor et al. 2014 |
+| Chakras measurable anatomy organs | refuted/chakras-as-measurable-anatomy.md | no anatomical correlate (unsupported) |
