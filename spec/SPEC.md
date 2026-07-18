@@ -1,6 +1,8 @@
 # The Librarian: A Specification for Sovereign, Auditable, Navigation-First AI
 
-**Sadu Pamdir** · Independent Researcher, Switzerland · Draft v0.2 · License: MIT (spec) / CC BY 4.0 (text)
+**Sadu Pamdir** · Independent Researcher, Switzerland · Version 0.2 (2026-07-18) · License: MIT (spec) / CC BY 4.0 (text)
+
+**This version (v0.2):** DOI [10.5281/zenodo.21427843](https://doi.org/10.5281/zenodo.21427843) · **All versions (concept DOI):** [10.5281/zenodo.21269196](https://doi.org/10.5281/zenodo.21269196) · **v0.1:** [10.5281/zenodo.21269197](https://doi.org/10.5281/zenodo.21269197)
 
 ## Abstract
 

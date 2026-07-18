@@ -61,9 +61,11 @@ Latency did not degrade moving from 2 GB test archives to the full 63 GB corpus.
 
 ## Cite
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21269197.svg)](https://doi.org/10.5281/zenodo.21269197)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21269196.svg)](https://doi.org/10.5281/zenodo.21269196)
 
-> Pamdir, S. (2026). *The Librarian: A Specification for Sovereign, Auditable, Navigation-First AI* (v0.1). Zenodo. https://doi.org/10.5281/zenodo.21269197
+> Pamdir, S. (2026). *The Librarian: A Specification for Sovereign, Auditable, Navigation-First AI* (v0.2). Zenodo. https://doi.org/10.5281/zenodo.21427843
+
+All versions (concept DOI): https://doi.org/10.5281/zenodo.21269196 · v0.1: https://doi.org/10.5281/zenodo.21269197
 
 ## Acknowledgments
 
